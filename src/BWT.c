@@ -70,12 +70,12 @@ void inserisci_genoma (genoma* d, char* filename){
 	d->a = (char*)(malloc((d->n) * sizeof(char)));
 
 	// alloco spazio per suffix array
-	d->suffix = (int*)(malloc((d->) * sizeof(int)));
+	d->suffix = (int*)(malloc((d->n) * sizeof(int))); // Set length of suffix array to n (genome size + 1)
 
 	// copio in a la sequenza in seq.s
 	strncpy(d->a, seq->seq.s, (d->n)-1);
 	// aggiungo il carattere speciale in ultima posizione
-	d->a[(d->)-1]='$';
+	d->a[(d->n)-1]='$'; // Copy $ at index n-1.
 
 	// libero memoria in seq e chiudo il file.
 	kseq_destroy(seq);
@@ -99,7 +99,7 @@ void make_k (genoma* d, char* mat){
 
 	// popolo tutte le altre righe della matrice
 	for(i=1; i<(d->n); i++){
-		for(j=0; j<(d->); j++)
+		for(j=0; j<(d->k); j++) // Loop up to column k. Considering starting from 0 to k-1. k+1 column gets filled at the end of the loop.
 			*(mat+i*(d->k+1)+j)=d->a[(i+j)%(d->n)]; //(i+j)%(d->n) perchè quando finisco la stringa le lettere devo prenderle dall'inizio
 		*(mat+i*(d->k+1)+(d->k))=d->a[(i-1)];
 	}
@@ -146,7 +146,7 @@ void de_brujin (genoma* d, FILE* fd){
 	printf("\n\n\t\t\t\t********************************\n\n\n");
 
 	// libero memoria allocata
-	free(met);
+	free(mat); // Typo. Change met into mat to free memory.
 	free(pivot);
    	free(tmp);
 }
@@ -265,7 +265,7 @@ void output (genoma* d, char* mat, FILE* fd){
 	int i, k, x;
 
 	// per ciascuno degli n elementi del genoma (a), sovrascrivo inserendo il relativo carattere della BWT (ultimo carattere della rispettica riga)
-	for(i=0; i<(d->); i++)
+	for(i=0; i<(d->n); i++) // Loop through all n which is genome size + special character '$'.
 		d->a[i]=*(mat+i*(d->k+1)+d->k);
 
 	if(fd==NULL){
@@ -278,7 +278,7 @@ void output (genoma* d, char* mat, FILE* fd){
 	fprintf(fd, "\n");
 
 	//scrivo Suffix Array
-	for(i=0; i< ; i++)
+	for(i=0; i<(d->n); i++) // Suffix array of length n as genome size + special character '$'.
 		fprintf(fd, "%d ", d->suffix[i]);
 
 }

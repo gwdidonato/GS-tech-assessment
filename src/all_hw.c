@@ -87,7 +87,7 @@ int main(int argc, char *argv[]){
 		insert_reads(&r, seq);
 
 		//backward search on reference stored as wavelet tree
-		bw_search(ref, &r, &dollar_posix, head_tree, seq->name.s);
+		bw_search(&ref, &r, &dollar_posix, head_tree, seq->name.s); // bw_search function takes as input a pointer to ref (&ref), not ref itself.
 		//write the number of matches
 		fprintf(fresults, "> %s | [%d bp] | + %d:\n", seq->name.s, (int)(seq->seq.l), (r.end - r.start +1));
 		//locate the matches' positions
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]){
 		rev_comp(&r,(int)(seq->seq.l));
 
 		//backward search on reference stored as wavelet tree
-		bw_search(&ref, &r, &dollar_posix, &head_tree, seq->name.s);
+		bw_search(&ref, &r, &dollar_posix, head_tree, seq->name.s); //Removed &head_tree. head_tree is already a pointer. &head_tree is the memory address of the pointer.
 		//write the number of reverse matches
 		fprintf(fresults, "> %s | [%d bp] | - %d:\n", seq->name.s, (int)(seq->seq.l), (r.end - r.start +1));
 		//locate the reverse matches' positions
@@ -198,7 +198,7 @@ void compute_c (reference* ref){
 		ref->c[i]=0;
 	//count occurrences for each symbol in the BWT
 	for(i=0; i<ref->n; i++)
-		++(ref->c[ref->[i]]);
+		++(ref->c[ref->BWT[i]]); // Add BWT to loop through each character of the transformation and update the count.
 
 	//for each character in the BWT alphabet ($), count lexicographically smaller characters
 	ref->c[T]=(ref->c[G])+(ref->c[C])+(ref->c[A])+1;
@@ -316,8 +316,10 @@ void locate (reference* ref, query* r, FILE* fresults){
 		exit(6);
 	}
 
-	for(i = r->start; i <= r->end; i++)
-		fprintf(fresults, "\t%d", ->suffix_array[i]);
+	for(i = r->start; i <= r->end; i++){ // Add parenthesis
+		fprintf(fresults, "\t%d", ref->suffix_array[i]); // Add ref to point to suffix array
+	}
+		
 }
 
 // compute the reverse complement of a string
@@ -330,7 +332,7 @@ void rev_comp(query* r, int dim){
 	r->m = dim;
 
 	// swap the elements
-	for (i = 0; i < dim/; ++i){
+	for (i = 0; i < dim; ++i){ // Remove / parenthesis. Loop through all dimension of query array
 		tmp=r->qseq[i];
 		r->qseq[i]=r->qseq[r->m-1-i];
 		r->qseq[r->m-1-i]=tmp;
@@ -350,6 +352,8 @@ void locate_inv (reference* ref, query* r, FILE* fresults){
 		exit(7);
 	}
 
-	for(i = r->start; i <= r->end; i++)
-			fprintf(, "\t%d", (ref->n)-(ref->suffix_array[i])-1);
+	for(i = r->start; i <= r->end; i++){
+		fprintf(fresults, "\t%d", (ref->n)-(ref->suffix_array[i])-1); // Add file pointer and parenthesis.
+	}
+			
 }
