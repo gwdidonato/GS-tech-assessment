@@ -332,7 +332,7 @@ void rev_comp(query* r, int dim){
 	r->m = dim;
 
 	// swap the elements
-	for (i = 0; i < dim; ++i){ // Remove / parenthesis. Loop through all dimension of query array
+	for (i = 0; i < dim / 2; ++i){ // Do not loop through all dimension of query array, but only half.
 		tmp=r->qseq[i];
 		r->qseq[i]=r->qseq[r->m-1-i];
 		r->qseq[r->m-1-i]=tmp;
