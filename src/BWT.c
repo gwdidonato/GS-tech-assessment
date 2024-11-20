@@ -70,12 +70,16 @@ void inserisci_genoma (genoma* d, char* filename){
 	d->a = (char*)(malloc((d->n) * sizeof(char)));
 
 	// alloco spazio per suffix array
-	d->suffix = (int*)(malloc((d->) * sizeof(int)));
+	//ERRORE: campo n non presente
+	//SOLUZIONE: aggiunta n per avere la grandezza del genoma
+	d->suffix = (int*)(malloc((d->n) * sizeof(int)));
 
 	// copio in a la sequenza in seq.s
 	strncpy(d->a, seq->seq.s, (d->n)-1);
 	// aggiungo il carattere speciale in ultima posizione
-	d->a[(d->)-1]='$';
+	//ERRORE: campo n non presente
+	//SOLUZIONE: aggiunta n per avere la grandezza del genoma, poi aggiungo $
+	d->a[(d->n)-1]='$';
 
 	// libero memoria in seq e chiudo il file.
 	kseq_destroy(seq);
@@ -93,13 +97,15 @@ void make_k (genoma* d, char* mat){
 	int i, j;
 
 	// popolo separatamente la prima riga perché l'ultimo carattere della prima riga è l'ultimo carattere dell'intera sequenza
+	//ERRORE: campo k non presente
+	//SOLUZIONE: aggiunta k per iterare lungo i k-meri
 	for(j=0; j<(d->k); j++)
 		*(mat+j)=d->a[j];
 	*(mat+(d->k))=d->a[(d->n)-1]; //in coda, l'elemento precedente
 
 	// popolo tutte le altre righe della matrice
 	for(i=1; i<(d->n); i++){
-		for(j=0; j<(d->); j++)
+		for(j=0; j<(d->k); j++)
 			*(mat+i*(d->k+1)+j)=d->a[(i+j)%(d->n)]; //(i+j)%(d->n) perchè quando finisco la stringa le lettere devo prenderle dall'inizio
 		*(mat+i*(d->k+1)+(d->k))=d->a[(i-1)];
 	}
@@ -146,7 +152,9 @@ void de_brujin (genoma* d, FILE* fd){
 	printf("\n\n\t\t\t\t********************************\n\n\n");
 
 	// libero memoria allocata
-	free(met);
+	//ERRORE: nome variabile allocata sbagliato 
+	//SOLUZIONE: cambio mat con met e libero memoria (basta guardare cosa alloco dinamicamente)
+	free(mat); 
 	free(pivot);
    	free(tmp);
 }
@@ -265,7 +273,9 @@ void output (genoma* d, char* mat, FILE* fd){
 	int i, k, x;
 
 	// per ciascuno degli n elementi del genoma (a), sovrascrivo inserendo il relativo carattere della BWT (ultimo carattere della rispettica riga)
-	for(i=0; i<(d->); i++)
+	//ERRORE: campo n non presente
+	//SOLUZIONE: aggiunta n per avere la grandezza del genoma
+	for(i=0; i<(d->n); i++)
 		d->a[i]=*(mat+i*(d->k+1)+d->k);
 
 	if(fd==NULL){
@@ -278,7 +288,9 @@ void output (genoma* d, char* mat, FILE* fd){
 	fprintf(fd, "\n");
 
 	//scrivo Suffix Array
-	for(i=0; i< ; i++)
+	//ERRORE: campo d->n non presente
+	//SOLUZIONE: aggiunta d->n per avere la grandezza del genoma su cui iterare
+	for(i=0; i< d->n; i++)
 		fprintf(fd, "%d ", d->suffix[i]);
 
 }
