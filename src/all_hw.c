@@ -87,7 +87,9 @@ int main(int argc, char *argv[]){
 		insert_reads(&r, seq);
 
 		//backward search on reference stored as wavelet tree
-		bw_search(ref, &r, &dollar_posix, head_tree, seq->name.s);
+		//ERRORE: ref non passato come puntatore
+		//SOLUZIONE: aggiunta di & per referenziare
+		bw_search(&ref, &r, &dollar_posix, head_tree, seq->name.s);
 		//write the number of matches
 		fprintf(fresults, "> %s | [%d bp] | + %d:\n", seq->name.s, (int)(seq->seq.l), (r.end - r.start +1));
 		//locate the matches' positions
@@ -99,7 +101,9 @@ int main(int argc, char *argv[]){
 		rev_comp(&r,(int)(seq->seq.l));
 
 		//backward search on reference stored as wavelet tree
-		bw_search(&ref, &r, &dollar_posix, &head_tree, seq->name.s);
+		//ERRORE: &head_tree è di tipo incompatibile con l'argomento passato
+		//SOLUZIONE: cancella &, passando così il giusto parametro
+		bw_search(&ref, &r, &dollar_posix, head_tree, seq->name.s);
 		//write the number of reverse matches
 		fprintf(fresults, "> %s | [%d bp] | - %d:\n", seq->name.s, (int)(seq->seq.l), (r.end - r.start +1));
 		//locate the reverse matches' positions
@@ -145,10 +149,22 @@ void insert_BWT (reference* ref, char* filename){
 	ref->suffix_array = (int*)(calloc(dim, sizeof(int)));
 
 	fseek(fBWT, 0L, SEEK_SET);
-	fscanf(fBWT, "%s", ref->BWT);
+	//ERRORE: il return value di fscan è ignorato
+	//SOLUZIONE: lancio di messaggio di debug e chiusura dell'esecuzione in caso di errore
+	if(fscanf(fBWT, "%s", ref->BWT) !=1){
+		fprintf(stderr, "Errore! stringhe BTW nel file non correttamente caricate");
+		fclose(fBWT);
+		exit(EXIT_FAILURE);
+	}
 
 	while(!feof(fBWT) && j < dim){
-		fscanf(fBWT, "%d ", &(ref->suffix_array[j]));
+		//ERRORE: il return value di fscan è ignorato
+		//SOLUZIONE: lancio di messaggio di debug e chiusura dell'esecuzione in caso di errore
+		if(fscanf(fBWT, "%d ", &(ref->suffix_array[j]))!=1){
+			fprintf(stderr, "Errore! stringhe BTW nel file non correttamente caricate");
+			fclose(fBWT);
+			exit(EXIT_FAILURE);
+		}
 		j++;
 	}
 
@@ -198,7 +214,9 @@ void compute_c (reference* ref){
 		ref->c[i]=0;
 	//count occurrences for each symbol in the BWT
 	for(i=0; i<ref->n; i++)
-		++(ref->c[ref->[i]]);
+		//ERRORE: non viene indicato il BWT array per poter contare le occorrenze (come descritto prima)
+		//SOLUZIONE: aggiunta dell'array BTW
+		++(ref->c[ref->BWT[i]]);
 
 	//for each character in the BWT alphabet ($), count lexicographically smaller characters
 	ref->c[T]=(ref->c[G])+(ref->c[C])+(ref->c[A])+1;
@@ -317,7 +335,9 @@ void locate (reference* ref, query* r, FILE* fresults){
 	}
 
 	for(i = r->start; i <= r->end; i++)
-		fprintf(fresults, "\t%d", ->suffix_array[i]);
+		//ERRORE: non viene stampato il risultato sul file passato per parametro a funzione
+		//SOLUZIONE: aggiunta del file di output fresults
+		fprintf(fresults, "\t%d", ref->suffix_array[i]);
 }
 
 // compute the reverse complement of a string
@@ -330,7 +350,10 @@ void rev_comp(query* r, int dim){
 	r->m = dim;
 
 	// swap the elements
-	for (i = 0; i < dim/; ++i){
+	//ERRORE: il sorting della sequenza (swap in questo caso) è utile fino a metà di essa (poi ci sono valori ripetuti),
+	//		  ma in questo caso manca la dimesione della sequenza da dividere per 2
+	//SOLUZIONE: aggiunta di dim, dimensione dell'array
+	for (i = 0; i < dim/2; ++i){
 		tmp=r->qseq[i];
 		r->qseq[i]=r->qseq[r->m-1-i];
 		r->qseq[r->m-1-i]=tmp;
@@ -351,5 +374,7 @@ void locate_inv (reference* ref, query* r, FILE* fresults){
 	}
 
 	for(i = r->start; i <= r->end; i++)
-			fprintf(, "\t%d", (ref->n)-(ref->suffix_array[i])-1);
+		//ERRORE: non viene stampato il risultato sul file passato per parametro a funzione
+		//SOLUZIONE: aggiunta del file di output fresults
+		fprintf(fresults, "\t%d", (ref->n)-(ref->suffix_array[i])-1);
 }
